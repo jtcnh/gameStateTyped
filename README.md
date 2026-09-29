@@ -1,11 +1,8 @@
-# DataServiceTyped
+# GameStateTyped
 
-Persistent, auto-replicated, and observable player data for Roblox Luau.
+Persistent, auto-replicated, and observable game state for Roblox Luau.
 
 ## Documentation
-
-- [Getting started](https://leifstout.github.io/dataServiceTyped/docs/intro)
-- [Complete API reference](https://leifstout.github.io/dataServiceTyped/api)
 - Video tutorial coming soon
 
-If you're new to the package, start with the getting started guide and then use the API reference for full method/type details.
+This is a forked version of Leif's (DataServiceTyped)[https://github.com/leifstout/dataServiceTyped] to handle replication of game state that is not player-persistent.
