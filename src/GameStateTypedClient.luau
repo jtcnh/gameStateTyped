@@ -1,7 +1,6 @@
 local RunService = game:GetService("RunService")
 
 local Packages = script.Parent.Parent
-local Signal = require(Packages.Signal)
 local Networker = require(Packages.Networker)
 local Value = require(script.Parent.Value)
 
@@ -9,64 +8,80 @@ if RunService:IsServer() then
 	return {} :: any
 end
 
-local DataServiceClient = {
+local GameStateTypedClient = {
 	hasLoaded = false,
-	loadedSignal = Signal.new(),
+	_pendingOperations = {} :: { () -> () },
 }
 
-function DataServiceClient.init<T>(self: DataServiceClient<T>, template: T)
-	self.networker = Networker.client.new("DataService", self)
+function GameStateTypedClient.init<T>(self: GameStateTypedClient<T>, template: T)
+	self.networker = Networker.client.new("GameStateTyped", self)
 
 	if not RunService:IsRunning() then
 		self:load(template)
+	else
+		self:load(self.networker:fetch("getInitialState"))
 	end
-
-	if self.hasLoaded then
-		return self.data
-	end
-
-	self.loadedSignal:Wait()
 
 	return self.data
 end
 
-function DataServiceClient.load<T>(self: DataServiceClient<T>, data: T)
+function GameStateTypedClient.load<T>(self: GameStateTypedClient<T>, data: T)
 	self.data = Value.new(data)
 	self.hasLoaded = true
-	self.loadedSignal:Fire()
+	for _, operation in self._pendingOperations do
+		operation()
+	end
+	table.clear(self._pendingOperations)
 end
 
-function DataServiceClient.get<T>(self: DataServiceClient<T>, path: { string }): Value.Value<any>
-	if not self.hasLoaded then
-		self.loadedSignal:Wait()
-	end
-
+function GameStateTypedClient.get<T>(self: GameStateTypedClient<T>, path: { string | number }): Value.Value<any>
 	local current = self.data
 	for i = #path, 2, -1 do
 		local key = path[i]
 		current = (current :: any)[key]
 	end
 
-	return current[path[1]]
+	return (current :: any)[path[1]]
 end
 
-function DataServiceClient.set<T>(self: DataServiceClient<T>, path: { string }, value: any?)
-	self:get(path)(value)
+function GameStateTypedClient.set<T>(self: GameStateTypedClient<T>, path: { string | number }, value: any?)
+	local operation = function()
+		self:get(path)(value)
+	end
+	if not self.hasLoaded then
+		table.insert(self._pendingOperations, operation)
+	else
+		operation()
+	end
 end
 
-function DataServiceClient.insert<T>(self: DataServiceClient<T>, path: { string }, item: any, pos: number?)
-	self:get(path).Insert(item, pos)
+function GameStateTypedClient.insert<T>(self: GameStateTypedClient<T>, path: { string | number }, item: any, pos: number?)
+	local operation = function()
+		self:get(path).Insert(item, pos)
+	end
+	if not self.hasLoaded then
+		table.insert(self._pendingOperations, operation)
+	else
+		operation()
+	end
 end
 
-function DataServiceClient.remove<T>(self: DataServiceClient<T>, path: { string }, pos: number?)
-	self:get(path).Remove(pos)
+function GameStateTypedClient.remove<T>(self: GameStateTypedClient<T>, path: { string | number }, pos: number?)
+	local operation = function()
+		self:get(path).Remove(pos)
+	end
+	if not self.hasLoaded then
+		table.insert(self._pendingOperations, operation)
+	else
+		operation()
+	end
 end
 
-export type DataServiceClient<T> = typeof(DataServiceClient) & {
+export type GameStateTypedClient<T> = typeof(GameStateTypedClient) & {
 	hasLoaded: boolean,
-	loadedSignal: Signal.Signal<>,
+	_pendingOperations: { () -> () },
 	networker: Networker.Client,
 	data: Value.Value<T>,
 }
 
-return DataServiceClient
+return GameStateTypedClient
