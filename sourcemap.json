@@ -1,1 +1,38 @@
-{"name":"dataservicetyped","className":"ModuleScript","filePaths":["src/init.luau","default.project.json"],"children":[{"name":"DataServiceClient","className":"ModuleScript","filePaths":["src/DataServiceClient.luau"]},{"name":"DataServiceServer","className":"ModuleScript","filePaths":["src/DataServiceServer.luau"]},{"name":"DataServiceUtils","className":"ModuleScript","filePaths":["src/DataServiceUtils.luau"]},{"name":"Value","className":"ModuleScript","filePaths":["src/Value.luau"]}]}
+{
+    "name": "gamestatetyped",
+    "className": "ModuleScript",
+    "filePaths": [
+        "src/init.luau",
+        "default.project.json"
+    ],
+    "children": [
+        {
+            "name": "GameStateTypedClient",
+            "className": "ModuleScript",
+            "filePaths": [
+                "src/GameStateTypedClient.luau"
+            ]
+        },
+        {
+            "name": "GameStateTypedServer",
+            "className": "ModuleScript",
+            "filePaths": [
+                "src/GameStateTypedServer.luau"
+            ]
+        },
+        {
+            "name": "GameStateTypedTypes",
+            "className": "ModuleScript",
+            "filePaths": [
+                "src/GameStateTypedTypes.luau"
+            ]
+        },
+        {
+            "name": "Value",
+            "className": "ModuleScript",
+            "filePaths": [
+                "src/Value.luau"
+            ]
+        }
+    ]
+}
